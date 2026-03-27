@@ -3,37 +3,59 @@
 #include <thread>
 using namespace std;
 
-void thread1(ThreadSafeStack &st) {
-    st.Push(10);
-    st.Push(20);
-    st.Push(30);
-    cout << "[thread 1] done" << endl;
+// 全局栈
+ThreadSafeStack st;
+
+// 测试函数：压入 3 个数
+void testPush(int a, int b, int c) {
+    st.Push(a);
+    st.Push(b);
+    st.Push(c);
 }
 
-void thread2(ThreadSafeStack &st) {
-    st.Push(100);
-    st.Push(200);
-    cout << "[thread 2] done" << endl;
+// ======================
+// 1. 单线程测试
+// ======================
+void testSingleThread() {
+    cout << "\n=== Single Thread Test ===" << endl;
+    st.Clear(); // 清空栈
+
+    testPush(10, 20, 30);
+    st.Print();
+    cout << "Size: " << st.Size() << endl;
 }
 
-int main() {
-    // 🔥 全程英文，永不乱码
-    cout << "=== main thread start ===" << endl;
+// ======================
+// 2. 多线程测试
+// ======================
+void testMultiThread() {
+    cout << "\n=== Multi Thread Test ===" << endl;
+    st.Clear(); // 清空栈
 
-    ThreadSafeStack st;
-
-    thread t1(thread1, ref(st));
-    thread t2(thread2, ref(st));
+    // 线程1压 1,2,3
+    thread t1(testPush, 1, 2, 3);
+    // 线程2压 100,200,300
+    thread t2(testPush, 100, 200, 300);
 
     t1.join();
     t2.join();
 
-    cout << endl;
-    cout << "final stack:" << endl;
     st.Print();
+    cout << "Size: " << st.Size() << endl;
+}
 
-    cout << "stack size: " << st.Size() << endl;
-    cout << "=== program run success ===" << endl;
+// ======================
+// 主函数
+// ======================
+int main() {
+    cout << "=== Program Start ===" << endl;
 
+    // 先跑单线程
+    testSingleThread();
+
+    // 再跑多线程
+    testMultiThread();
+
+    cout << "\n=== All Test Success ===" << endl;
     return 0;
 }
